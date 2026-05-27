@@ -1,0 +1,24 @@
+.DS_Store
+*.sif
+.env
+.vscode
+__pycache__
+
+# wandb log files
+/wandb
+
+# data folder that store datasets
+/data
+
+# chtc output
+running_detail
+# *.err
+# *.out
+# *.log
+
+# large files
+*.tar.gz
+*.pt
+*.pth
+*.safetensors
+*.zip

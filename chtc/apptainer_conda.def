@@ -1,0 +1,16 @@
+Bootstrap: docker
+From: conda/miniconda3:latest
+
+%files
+    requirements.txt requirements.txt
+    environment.yml environment.yml
+
+%post
+    # default
+    apt-get update && apt-get install -y gcc make wget git
+    conda env create -f environment.yml -n myvenv
+
+%labels
+    Author Giwon Shin
+    ContactEmail gshin22@wisc.edu
+    Name Automated Container Template

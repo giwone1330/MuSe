@@ -1,0 +1,31 @@
+defaults:
+  - trainer_args@args: hf_trainer_args
+  - optimizer@non_inst.optimizer: adamw
+  - scheduler@non_inst.scheduler: cosine
+  - _self_
+
+_target_: transformers.Trainer
+model: null
+train_dataset: null
+eval_dataset: null
+data_collator: null
+processing_class: null
+compute_loss_func: null
+compute_metrics: null
+callbacks: null
+optimizers: null
+optimizer_cls_and_kwargs: null
+preprocess_logits_for_metrics: null
+
+
+#! overriding only specific trainer args
+# non_inst:
+#   optimizer:
+#     lr: 0.001
+#     weight_decay: 0.1
+#   scheduler:
+#     scheduler_specific_kwargs:
+#       power: 1
+#       lr_end: 0.0001
+
+      

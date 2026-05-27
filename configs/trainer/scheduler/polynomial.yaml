@@ -1,0 +1,6 @@
+_target_: transformers.get_scheduler
+name: polynomial
+num_warmup_steps: 0.01
+scheduler_specific_kwargs:
+  power: 1
+  lr_end: 0.0001

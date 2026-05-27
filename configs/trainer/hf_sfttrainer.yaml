@@ -1,0 +1,24 @@
+defaults:
+  - trainer_args@args: hf_sfttrainer_args
+  - optimizer@non_inst.optimizer: adamw
+  - scheduler@non_inst.scheduler: cosine
+  - _self_
+
+_target_: trl.SFTTrainer
+model: null
+train_dataset: null
+eval_dataset: null
+data_collator: null # default to trl.trainer.sft_trainer.DataCollatorForLanguageModeling, which is different from transformer's default
+processing_class: null
+compute_loss_func: null
+compute_metrics: null
+callbacks: null
+optimizers: null
+optimizer_cls_and_kwargs: null
+preprocess_logits_for_metrics: null
+
+#! overriding only specific trainer args
+# non_inst:
+#   optimizer:
+#     lr: 0.001
+#     weight_decay: 0.1

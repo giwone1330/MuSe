@@ -1,0 +1,69 @@
+defaults:
+  - trainer: hf_trainer
+  - env: default
+  - _self_
+
+model:
+  _target_: src.models.gpt2_muse.modeling_gpt2_muse.GPT2LMHeadModel
+  config:
+    _target_: src.models.gpt2_muse.configuration_gpt2_muse.GPT2Config
+    n_layer: 6
+    n_head: 8
+    n_embd: 512
+    vocab_size: 50257
+    muse_wpe: true
+    muse_mixing_window: 64
+    n_inner: 512
+
+tokenizer:
+  _target_: transformers.AutoTokenizer.from_pretrained
+  pretrained_model_name_or_path: gpt2
+  pad_token: <|endoftext|>
+
+dataset:
+  _target_: datasets.load_dataset
+  path: "wikitext"
+  name: "wikitext-2-v1"
+  non_inst:
+    pre_processor:
+      _target_: src.data.pre_processor.causal_lm_pre_processor
+      map_args:
+        batched: true
+        batch_size: 1000
+        num_proc: max
+      tokenize_args:
+        truncation: true
+        max_length: 512
+      formatter:
+        _target_: src.data.pre_processor.formatter
+        method_name: format_simple_text
+    split_map:
+      train: train
+      eval: test
+
+trainer:
+  non_inst:
+    data_collator:
+      _target_: transformers.DataCollatorForLanguageModeling
+      mlm: false
+  args:
+    per_device_train_batch_size: 16
+    per_device_eval_batch_size: 16
+    num_train_epochs: 30
+  callbacks:
+    - _target_: transformers.EarlyStoppingCallback
+      early_stopping_patience: 3
+    - _target_: src.train.trainer_hooks.TimeLimitCallback
+      max_seconds: 36000
+
+evaluator:
+  _target_: src.eval.evaluator.CustomEvaluatorPerplexity
+  splits:
+    - test
+  non_inst:
+    max_length: 512
+
+env:
+  huggingface:
+    model_name: wikitext2_m_tiny
+    private: True

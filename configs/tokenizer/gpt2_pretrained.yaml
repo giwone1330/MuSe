@@ -1,0 +1,4 @@
+_target_: transformers.AutoTokenizer.from_pretrained
+pretrained_model_name_or_path: gpt2
+
+# need to set model.config.vocab_size to 50257

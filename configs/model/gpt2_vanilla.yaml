@@ -1,0 +1,14 @@
+defaults:
+  - size@config: tiny
+  - _self_
+
+_target_: src.models.gpt2_vanilla.modeling_gpt2_vanilla.GPT2LMHeadModel
+config:
+  _target_: src.models.gpt2_vanilla.configuration_gpt2_vanilla.GPT2Config
+  # n_layer: 6
+  # n_head: 8
+  # n_embd: 512
+  vocab_size: 50257  # auto_resolve will overwrite with actual tokenizer vocab size
+  # n_inner: 512 # defaults to 4 times n_embed
+non_inst:
+  model_type: gpt2

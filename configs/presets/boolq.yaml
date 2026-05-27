@@ -1,0 +1,61 @@
+defaults:
+  - trainer: hf_sfttrainer
+  - env: default
+  - tokenizer: gpt2_pretrained
+  - model: null
+  - _self_
+
+dataset:
+  _target_: datasets.load_dataset
+  path: "boolq"
+  non_inst:
+    pre_processor:
+      _target_: src.data.pre_processor.causal_lm_pre_processor
+      map_args:
+        batched: true
+        batch_size: 1000
+        num_proc: max
+      manipulate_args:
+        prompt: prompt
+        completion: completion
+      formatter:
+        _target_: src.data.pre_processor.formatter
+        method_name: format_boolq_for_prompt_completion
+    split_map:
+      train: train
+      eval: validation
+
+trainer:
+  args:
+    completion_only_loss: true
+    per_device_train_batch_size: 16
+    per_device_eval_batch_size: 16
+    packing: false
+    max_length: 512
+    num_train_epochs: 30
+  callbacks:
+    - _target_: transformers.EarlyStoppingCallback
+      early_stopping_patience: 3
+    - _target_: src.train.trainer_hooks.TimeLimitCallback
+      max_seconds: 36000
+
+evaluator:
+  _target_: src.eval.evaluator.CustomEvaluator
+  splits: [validation]
+  non_inst:
+    metrics:
+      boolqAccuracy:
+        _target_: evaluate.load
+        path: ./src/metrics/classification_accuracy/metric.py
+    max_length: 512
+    generate_args:
+      max_new_tokens: 3
+      num_beams: 1
+      do_sample: False
+      use_cache: False
+
+env:
+  huggingface:
+    model_name: boolq_${model.non_inst.model_type}_l${model.config.n_layer}h${model.config.n_head}d${model.config.n_embd}
+    private: True
+

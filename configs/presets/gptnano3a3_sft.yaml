@@ -1,0 +1,7 @@
+defaults:
+  - model: gpt2nano_s
+  - tokenizer: charlevel
+  - dataset: arithmetic_3a3
+  - trainer: hf_trainer
+  - env: default
+  - _self_

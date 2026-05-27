@@ -1,0 +1,11 @@
+_target_: transformers.GPT2LMHeadModel
+config:
+  _target_: transformers.GPT2Config
+  bias: true
+  model_type: gpt2
+  block_size: 1024
+  dropout: 0.2
+  n_embd: 384
+  n_head: 6
+  n_layer: 6
+  vocab_size: 50257

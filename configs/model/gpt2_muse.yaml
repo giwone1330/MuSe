@@ -1,0 +1,16 @@
+defaults:
+  - size@config: tiny
+  - _self_
+
+_target_: src.models.gpt2_muse.modeling_gpt2_muse.GPT2LMHeadModel
+config:
+  _target_: src.models.gpt2_muse.configuration_gpt2_muse.GPT2Config
+  # n_layer: 6
+  # n_head: 8
+  # n_embd: 512
+  vocab_size: 50257  # auto_resolve will overwrite with actual tokenizer vocab size
+  muse_wpe: true
+  muse_mixing_window: 64
+  n_inner: 512 # defaults to 4 times n_embed
+non_inst:
+  model_type: muse

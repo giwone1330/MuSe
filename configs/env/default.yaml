@@ -1,0 +1,39 @@
+defaults:
+  # - system: chtc
+  - _self_
+
+# seed and reproducibility
+seed: 42
+deterministic: False # reproducible, but may have small difference
+# deterministic: True # make strictly same output, at the cost of speed
+
+
+# $(Cluster)/$(Process)_$(model_config)
+chtc:
+  cluster: null
+  process: null
+  model_config: null
+
+print_machine: True
+print_gpu: True
+auto_resolve:
+  model: True
+device: null
+
+num_proc: Max # int or max
+
+huggingface:
+  model_name: wandb # if logger name -> use the run name from the logger
+  private: True
+
+output_dir: null
+
+debug: False
+verbose: True
+
+
+tracker:
+  wandb:
+    dir: ./wandb
+
+

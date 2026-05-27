@@ -1,0 +1,4 @@
+# 1B
+n_layer: 16
+n_head: 8
+n_embd: 2048

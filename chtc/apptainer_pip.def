@@ -1,0 +1,15 @@
+Bootstrap: docker
+From: python:3.10.14
+
+%files
+    requirements.txt requirements.txt
+
+%post
+    # default
+    apt-get update && apt-get install -y gcc make wget git
+    pip install -r requirements.txt
+
+%labels
+    Author Giwon Shin
+    ContactEmail gshin22@wisc.edu
+    Name Automated Container Template

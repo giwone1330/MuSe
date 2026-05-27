@@ -1,0 +1,37 @@
+Bootstrap: docker
+From: nvidia/cuda:12.2.0-devel-ubuntu22.04
+
+%files
+    requirements.txt requirements.txt
+    environment.yml environment.yml
+
+%post
+    # default
+    apt-get update && apt-get install -y gcc make wget git
+    
+    # Set environment variables
+    export CONDA_DIR=/opt/conda
+    export PATH=/opt/conda/bin:$PATH
+
+    # install miniconda
+    wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+    bash Miniconda3-latest-Linux-x86_64.sh -b -p /opt/conda
+    rm Miniconda3-latest-Linux-x86_64.sh
+
+    # Initialize Conda for bash
+    /opt/conda/bin/conda init
+    /opt/conda/bin/conda config --set always_yes yes
+    /opt/conda/bin/conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main
+    /opt/conda/bin/conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
+
+    # creating conda env with environemtn.yml
+    /opt/conda/bin/conda env create -f environment.yml -n myvenv
+
+    
+%environment
+    export PATH="/opt/conda/bin:$PATH"
+
+%labels
+    Author Giwon Shin
+    ContactEmail gshin22@wisc.edu
+    Name Automated Container Template

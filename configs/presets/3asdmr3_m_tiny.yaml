@@ -1,0 +1,165 @@
+defaults:
+  - trainer: hf_sfttrainer
+  - env: default
+  - tokenizer: charlevel
+  - _self_
+
+# env:
+#   num_proc: 4
+
+
+# model:
+#   _target_: transformers.GPT2LMHeadModel
+#   config:
+#     _target_: transformers.GPT2Config
+#     bias: true
+#     model_type: gpt2
+#     block_size: 1024
+#     dropout: 0.2
+#     n_embd: 384
+#     n_head: 6
+#     n_layer: 6
+#     vocab_size: 50257
+model:
+  _target_: src.models.gpt2_muse.modeling_gpt2_muse.GPT2LMHeadModel
+  config:
+    _target_: src.models.gpt2_muse.configuration_gpt2_muse.GPT2Config
+    n_layer: 6
+    n_head: 8
+    n_embd: 512
+    vocab_size: 101
+    muse_wpe: true
+    muse_mixing_window: 64
+    n_inner: 512 # defaults to 4 times n_embed
+
+
+dataset:
+  _target_: src.data.generator.EquationSyntheticDatasetBuilder
+  generate_args:
+    splitsizes:
+      train: 1000000
+      test: 100000
+      eval: 100000
+    digitranges:
+      train:
+        operand_1:
+        - 1
+        - 3
+        operand_2:
+        - 1
+        - 3
+      test:
+        operand_1:
+        - 1
+        - 3
+        operand_2:
+        - 1
+        - 3
+      eval:
+        operand_1:
+        - 1
+        - 3
+        operand_2:
+        - 1
+        - 3
+    balance_digits:
+      train: true
+      test: false
+      eval: false
+    shuffle:
+      train: true
+      test: true
+      eval: true
+    operators:
+      train:
+        operator_1:
+        - "+"
+        - "-"
+        - "*"
+        - "//"
+        - "%"
+      test:
+        operator_1:
+        - "+"
+        - "-"
+        - "*"
+        - "//"
+        - "%"
+      eval:
+        operator_1:
+        - "+"
+        - "-"
+        - "*"
+        - "//"
+        - "%"
+    radix: 10
+    parenthesis: None
+    batch_size: 1000
+  save_args:
+    save: false
+    save_dir: data/eqn
+    save_in_staging: false
+    push_to_hub: false
+    force_build: true
+    exit_after_save: false
+    exit_after_push: false
+  non_inst:
+    pre_processor:
+      _target_: src.data.pre_processor.causal_lm_pre_processor
+      map_args:
+        batched: true
+        batch_size: 1000
+        num_proc: max
+      manipulate_args:
+        prompt: prompt
+        completion: completion
+      formatter:
+        _target_: src.data.pre_processor.formatter
+        method_name: format_equations_for_prompt_completion
+    split_map:
+      train: train
+      eval: eval
+
+
+tokenizer:
+  non_inst:
+    post_processor:
+      templates:
+        single: bos_token $0
+
+trainer:
+  args:
+    completion_only_loss: true
+    per_device_train_batch_size: 512
+    per_device_eval_batch_size: 512
+    packing: false
+    max_length: 1024
+    num_train_epochs: 30
+  callbacks:
+    - _target_: transformers.EarlyStoppingCallback
+      early_stopping_patience: 3
+    - _target_: src.train.trainer_hooks.TimeLimitCallback
+      max_seconds: 36000
+
+
+evaluator:
+  _target_: src.eval.evaluator.CustomEvaluator
+  splits: 
+    - test
+  non_inst:
+    metrics:
+      eqnRHSdiff:
+        _target_: evaluate.load
+        path: ./src/metrics/eqn_rhs_diff/metric.py
+        equals_token: '='
+    generate_args:
+      max_new_tokens: 128          # max new tokens to generate
+      num_beams: 1            # beam search
+      do_sample: False
+      use_cache: False
+    # batch_size: 256
+
+env:
+  huggingface:
+    model_name: 3asdmr3_m_tiny
+    private: True    

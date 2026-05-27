@@ -1,0 +1,8 @@
+_target_: transformers.get_scheduler
+name: cosine_with_min_lr
+num_warmup_steps: 0.01
+scheduler_specific_kwargs:
+  # num_cycles: #(float, optional, defaults to 0.5) — The number of waves in the cosine schedule (the defaults is to just decrease from the max value to 0 following a half-cosine).
+  # last_epoch: #(int, optional, defaults to -1) — The index of the last epoch when resuming training.
+  # min_lr: #(float, optional) — The minimum learning rate to reach after the cosine schedule.
+  min_lr_rate: 0.1 #(float, optional) — The minimum learning rate as a ratio of the initial learning rate. If set, min_lr should not be set.

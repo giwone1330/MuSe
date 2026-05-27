@@ -1,0 +1,64 @@
+train_py:
+  - src/main_lm5.py
+
+--config-path:
+  - ../configs/presets
+--config-dir:
+  - configs
+--config-name:
+  - fineweb_test
+
+model:
+  - gpt2_vanilla
+  - gpt2_muse
+
+model/size@model.config:
+  - large
++model.config.n_positions:
+  - 2048
+
+dataset.non_inst.pre_processor.map_args.num_proc:
+  - 20
+dataset.non_inst.pre_processor.map_args.batch_size:
+  - 1024
+
+dataset.name:
+  - sample-10BT
+
+trainer.non_inst.optimizer.lr:
+  - 0.0003
+trainer.args.num_train_epochs:
+  - 0.1
+trainer.callbacks.0.early_stopping_patience:
+  - 5
+trainer.callbacks.1.max_seconds:
+  - 561600 # 6.5 days
+  # - 72000 # 20hours
+  # - 36000 # 10hours
+
+# # check dataset.yaml's configs for actual values
+# trainer.args.num_train_epochs:
+#   - 30
+trainer.args.per_device_train_batch_size:
+  - 2 # 4m: 48g 4t:oom
+trainer.args.per_device_eval_batch_size:
+  - 2
+trainer.args.gradient_accumulation_steps:
+  - 32
+
+trainer.args.eval_strategy:
+  - steps
+trainer.args.save_strategy:
+  - steps
++trainer.args.save_steps:
+  - 0.1
++trainer.args.eval_steps:
+  - 0.1
+trainer.args.eval_on_start:
+  - false
+
+dataset.non_inst.pre_processor.train2val:
+  - 0.0001
+
+env.output_dir:
+  - /data2/users/gshin22/fineweb_faistos/temp

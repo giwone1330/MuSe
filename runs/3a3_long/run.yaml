@@ -1,0 +1,13 @@
+train_py:
+  - src/main_lm5.py
+
+--config-path:
+  - ../configs/presets
+--config-dir:
+  - configs
+--config-name:
+  - 3a3_m_tiny
+  - 3a3_t_tiny
+
+trainer.non_inst.scheduler:
+  - cosine

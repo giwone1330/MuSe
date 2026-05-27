@@ -1,0 +1,13 @@
+defaults:
+  - model: gpt2_nano
+  - tokenizer: gpt2_nano
+  - dataset: wikitext_2
+  # - optimizer: adamw
+  - tracker: default
+  # - env: local
+  - trainer: default
+  # - data_collator: default
+  # - scheduler: linear
+  - env: default
+  - _self_
+  # - presets@_self_: none

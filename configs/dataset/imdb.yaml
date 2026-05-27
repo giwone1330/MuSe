@@ -1,0 +1,18 @@
+_target_: datasets.load_dataset
+path: "imdb"
+non_inst:
+  pre_processor:
+    _target_: src.data.pre_processor.causal_lm_pre_processor
+    map_args:
+      batched: true
+      batch_size: 1000
+      num_proc: max
+    manipulate_args:
+      prompt: prompt
+      completion: completion
+    formatter:
+      _target_: src.data.pre_processor.formatter
+      method_name: format_imdb_for_prompt_completion  # requires new method (see note below)
+  split_map:
+    train: train
+    eval: test  # IMDB uses "test" split, not "eval"

@@ -1,0 +1,76 @@
+defaults:
+  - trainer: hf_sfttrainer
+  - env: default
+  - _self_
+
+model:
+  _target_: src.models.gpt2_muse.modeling_gpt2_muse.GPT2LMHeadModel
+  config:
+    _target_: src.models.gpt2_muse.configuration_gpt2_muse.GPT2Config
+    n_layer: 6
+    n_head: 8
+    n_embd: 512
+    vocab_size: 50257  # auto_resolve will overwrite with actual tokenizer vocab size
+    muse_wpe: true
+    muse_mixing_window: 64
+    n_inner: 512 # defaults to 4 times n_embed
+
+# GPT-2 pretrained tokenizer; no char-level or custom post-processor needed
+tokenizer:
+  _target_: transformers.AutoTokenizer.from_pretrained
+  pretrained_model_name_or_path: gpt2
+
+dataset:
+  _target_: datasets.load_dataset
+  path: "imdb"
+  non_inst:
+    pre_processor:
+      _target_: src.data.pre_processor.causal_lm_pre_processor
+      map_args:
+        batched: true
+        batch_size: 1000
+        num_proc: max
+      manipulate_args:
+        prompt: prompt
+        completion: completion
+      formatter:
+        _target_: src.data.pre_processor.formatter
+        method_name: format_imdb_for_prompt_completion  # requires new method (see note below)
+    split_map:
+      train: train
+      eval: test  # IMDB uses "test" split, not "eval"
+
+trainer:
+  args:
+    completion_only_loss: true
+    per_device_train_batch_size: 16
+    per_device_eval_batch_size: 16
+    packing: false
+    max_length: 512   # IMDB reviews can be long; truncate to 512 tokens
+    num_train_epochs: 30
+  callbacks:
+    - _target_: transformers.EarlyStoppingCallback
+      early_stopping_patience: 3
+    - _target_: src.train.trainer_hooks.TimeLimitCallback
+      max_seconds: 36000
+
+evaluator:
+  _target_: src.eval.evaluator.CustomEvaluator
+  # splits: 
+  #   - test
+  non_inst:
+    metrics:
+      sentimentAccuracy:
+        _target_: evaluate.load
+        path: ./src/metrics/sentiment_accuracy/metric.py
+    max_length: 512
+    generate_args:
+      max_new_tokens: 3
+      num_beams: 1
+      do_sample: False
+      use_cache: False
+
+env:
+  huggingface:
+    model_name: imdb_m_tiny
+    private: True    

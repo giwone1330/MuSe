@@ -1,0 +1,49 @@
+# Submit file (runs/3a3_long/run.sub)
+model_config=--config-name-$(arg5)
+number=$(Cluster)_$(Process)
+output_directory = hf_secure/runs/3a3_long/$(Cluster)/$(Process)_$(model_config)
+container_local_output_directory = hf_secure/runs/3a3_long/local
+universe = vanilla
+
+log = /home/gshin22/$(output_directory)/running_detail/job.log
+error = /home/gshin22/$(output_directory)/running_detail/job.err
+output = /home/gshin22/$(output_directory)/running_detail/job.out
+
+container_image = osdf:///chtc/staging/gshin22/hf_secure/apptainers/apptainer_conda_cuda_260211152545.sif
+executable = hf_secure/runs/3a3_long/run.sh
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
+
+# should add separate directory for the datasets
+# transfer_input_files = /staging/gshin22/hf_secure/hf_secure_260316022129.tar.gz ### since this is already in staging which is shared between container and the server, no need to transfer
+
+
+arguments = $(model_config) $(number) $(Cluster) $(Process) $(arg5)
+
+output0 = $(container_local_output_directory)/hydra/.hydra/config.yaml
+output1 = $(container_local_output_directory)/hydra/.hydra/overrides.yaml
+output2 = $(container_local_output_directory)/hydra/.hydra/hydra.yaml
+output3 = $(container_local_output_directory)/hydra/main_lm5.log
+
+transfer_output_files = $(output0), $(output1), $(output2), $(output3)
+
+transfer_output_remaps = "config.yaml=/home/gshin22/$(output_directory)/hydra/.hydra/config.yaml; overrides.yaml=/home/gshin22/$(output_directory)/hydra/.hydra/overrides.yaml; hydra.yaml=/home/gshin22/$(output_directory)/hydra/.hydra/hydra.yaml; main_lm5.log=/home/gshin22/$(output_directory)/hydra/main_lm5.log"
+
+# Memory, disk and CPU requests
+request_memory = 32GB
+request_disk = 100GB
+request_cpus = 2
+
+request_gpus = 1
++WantGPULab = true
++GPUJobLength = "short"
+require_gpus = (Capability >= 7.0)
+
+
+# queue_key_map
+arg5 = --config-name
+
+queue arg5 from (
+    3a3_m_tiny
+    3a3_t_tiny
+    )
